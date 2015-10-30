@@ -1,0 +1,22 @@
+{
+    "rooms": {
+        "living": {
+            "roo12": {
+                "name": "Room Test", 
+                "occupants": []
+            }
+        }, 
+        "office": {
+            "off13": {
+                "name": "office Test", 
+                "occupants": [
+                    "tes23"
+                ]
+            }, 
+            "rid01": {
+                "name": "Room Testing", 
+                "occupants": []
+            }
+        }
+    }
+}

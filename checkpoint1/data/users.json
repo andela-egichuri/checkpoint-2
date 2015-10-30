@@ -1,0 +1,144 @@
+{
+    "users": {
+        "fellows": {
+            "ale32": {
+                "accomodation": "Y", 
+                "username": "ALEX KANG'ETHE"
+            }, 
+            "ale51": {
+                "accomodation": "Y", 
+                "username": "ALEX MWALEH"
+            }, 
+            "ben65": {
+                "accomodation": "Y", 
+                "username": "BENJAMIN KAGIA"
+            }, 
+            "bri61": {
+                "accomodation": "Y", 
+                "username": "BRIAN MOSIGISI"
+            }, 
+            "chr89": {
+                "accomodation": "Y", 
+                "username": "CHRISTOPHER VUNDI"
+            }, 
+            "col30": {
+                "accomodation": "Y", 
+                "username": "COLLIN MUTEMBEI"
+            }, 
+            "eri87": {
+                "accomodation": "N", 
+                "username": "ERIC GICHURI"
+            }, 
+            "eug94": {
+                "accomodation": "N", 
+                "username": "EUGENE MUTAI"
+            }, 
+            "gan91": {
+                "accomodation": "Y", 
+                "username": "GANGA CHRIS"
+            }, 
+            "ger61": {
+                "accomodation": "Y", 
+                "username": "GERTRUDE NYENYESHI"
+            }, 
+            "han35": {
+                "accomodation": "Y", 
+                "username": "HANNAH KOSKE"
+            }, 
+            "jee88": {
+                "accomodation": "N", 
+                "username": "JEE GITHINJI"
+            }, 
+            "jer32": {
+                "accomodation": "Y", 
+                "username": "JEREMY KITHOME"
+            }, 
+            "joa29": {
+                "accomodation": "Y", 
+                "username": "JOAN NGATIA"
+            }, 
+            "kev86": {
+                "accomodation": "N", 
+                "username": "KEVIN GATHUKU"
+            }, 
+            "lew83": {
+                "accomodation": "Y", 
+                "username": "LEWIS MAINA"
+            }, 
+            "mah55": {
+                "accomodation": "Y", 
+                "username": "MAHAD WALUSIMBI"
+            }, 
+            "nat57": {
+                "accomodation": "Y", 
+                "username": "NATE ARTIN"
+            }, 
+            "sta10": {
+                "accomodation": "N", 
+                "username": "STACEY ACHUNGO"
+            }, 
+            "sta48": {
+                "accomodation": "Y", 
+                "username": "STANLEY NDAGI"
+            }, 
+            "ted26": {
+                "accomodation": "N", 
+                "username": "TEDDY ASOLA"
+            }, 
+            "tho89": {
+                "accomodation": "Y", 
+                "username": "THOMAS NYAMBATI"
+            }
+        }, 
+        "staff": {
+            "ant94": {
+                "accomodation": "N/A", 
+                "username": "ANTHONY NANDAA"
+            }, 
+            "chr39": {
+                "accomodation": "N/A", 
+                "username": "CHRISTINA SASS"
+            }, 
+            "eva22": {
+                "accomodation": "N/A", 
+                "username": "EVAN GREENLOWE"
+            }, 
+            "god18": {
+                "accomodation": "N/A", 
+                "username": "GODSON UKPERE"
+            }, 
+            "hel99": {
+                "accomodation": "N/A", 
+                "username": "HELLEN MAINA"
+            }, 
+            "jac74": {
+                "accomodation": "N/A", 
+                "username": "JACKSON SAYA"
+            }, 
+            "jos93": {
+                "accomodation": "N/A", 
+                "username": "JOSHUA MWANIKI"
+            }, 
+            "mes77": {
+                "accomodation": "N/A", 
+                "username": "MESHACK NYABIBA"
+            }, 
+            "mic51": {
+                "accomodation": "N/A", 
+                "username": "MICHAEL ROSENBERG"
+            }, 
+            "nya19": {
+                "accomodation": "N/A", 
+                "username": "NYAMBURA KIHORO"
+            }, 
+            "osc53": {
+                "accomodation": "N/A", 
+                "username": "OSCAR OPONDO"
+            }, 
+            "rob99": {
+                "accomodation": "N/A", 
+                "username": "ROBERT OPIYO"
+            }
+        }
+    }
+}
