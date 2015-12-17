@@ -1,4 +1,6 @@
 from app import db
+from flask.ext.login import UserMixin
+from passlib.apps import custom_app_context as pwd_context
 
 
 class Bucketlist(db.Model):
@@ -19,9 +21,35 @@ class Item(db.Model):
 	bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'))
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	username = db.Column(db.String(80), unique=True)
 	email = db.Column(db.String(100), unique=True)
 	password = db.Column(db.String(128))
 
+	def hash_password(self, password):
+		self.password = pwd_context.encrypt(password)
+
+	def verify_password(self, password):
+		return pwd_context.verify(password, self.password)
+
+	@property
+	def is_authenticated(self):
+		return True
+
+	@property
+	def is_active(self):
+		return True
+
+	@property
+	def is_anonymous(self):
+		return False
+
+	def get_id(self):
+		try:
+			return unicode(self.id)
+		except NameError:
+			return str(self.id)
+
+	def __repr__(self):
+		return '<User %r>' % (self.username)

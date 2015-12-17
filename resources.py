@@ -3,19 +3,18 @@ import time
 from flask import jsonify, abort
 from flask_restful.reqparse import RequestParser
 from passlib.apps import custom_app_context as pwd_context
+from flask.ext.login import login_required
 
 from flask_restful import Resource, fields, marshal
 import models
 
 
-
-
 bli_fields = {
-	'id' : fields.Integer,
-	'name' : fields.String,
-	'date_created' : fields.String ,
-	'date_modified' : fields.String,
-	'done' : fields.Boolean,
+	'id': fields.Integer,
+	'name': fields.String,
+	'date_created': fields.String,
+	'date_modified': fields.String,
+	'done': fields.Boolean,
 }
 
 bl_fields = {
@@ -28,6 +27,8 @@ bl_fields = {
 
 # /bucketlists/
 class Bucketlists(Resource):
+
+	@login_required
 	def get(self):
 		try:
 			bq = db.session.query(models.Bucketlist).all()
@@ -142,9 +143,7 @@ class BucketlistItems(Resource):
 			db.session.commit()
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error Deleting'}
-
-
+			return {'Error': 'Error Deleting'}
 
 
 class User(Resource):
@@ -162,29 +161,27 @@ class User(Resource):
 		args = parser.parse_args()
 
 		if args.username is None or args.password is None:
-			return {'Error' : 'Fields required'}
-			abort(400) # missing arguments
+			return {'Error': 'Fields required'}
+			abort(400)
 		if models.User.query.filter_by(username=args.username).first() is not None:
-			return {'Error' : 'Username exists'}
-			abort(400) # existing user
+			return {'Error': 'Username exists'}
+			abort(400)
 		if models.User.query.filter_by(email=args.email).first() is not None:
-			return {'Error' : 'Email exists'}
-			abort(400) # existing user
+			return {'Error': 'Email exists'}
+			abort(400)
 		q = db.session.query
-		password_hash = pwd_context.encrypt(args.password)
-		user = models.User(username=args.username, email=args.email,
-			password=password_hash)
+		user = models.User(username=args.username, email=args.email)
+		user.hash_password(args.password)
 		try:
 			db.session.add(user)
 			db.session.commit()
-			return { 'username': user.username }, 201
+			return {'username': user.username}, 201
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error creating user'}
+			return {'Error': 'Error creating user'}
 
 	def put(self):
 		pass
 
 	def delete(self):
 		pass
-
