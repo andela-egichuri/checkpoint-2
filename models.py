@@ -33,12 +33,22 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(128))
+    online = db.Column(db.Boolean)
 
     def hash_password(self, password):
         self.password = pwd_context.encrypt(password)
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.password)
+
+    def verify_token(token):
+        try:
+            data = login_serializer.loads(token)
+            return data
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None
 
     def generate_auth_token(self):
         data = [str(self.id), self.password]

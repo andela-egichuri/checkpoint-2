@@ -4,7 +4,8 @@ import base64
 from flask import Flask, request, Response, g
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_restful import Api
-from flask.ext.login import LoginManager, logout_user, login_required
+from flask.ext.login import LoginManager, logout_user, login_required, \
+    current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
     BadSignature, SignatureExpired
 
@@ -36,13 +37,19 @@ def login():
     if not user or not user.verify_password(password):
         return jsonify({'message': 'Login Failed'})
     token = user.generate_auth_token()
+    user = db.session.query(User).filter_by(
+            username=username).one()
+    user.online = '1'
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
     return jsonify({'token': token})
 
 
 @login_manager.request_loader
 def load_user(request):
     auth_key = request.headers.get('Authorization')
-
     if auth_key:
         auth_key = auth_key.replace('Basic ', '', 1)
         try:
@@ -52,9 +59,8 @@ def load_user(request):
             if not user or not user.verify_password(password):
                 return False
         except TypeError:
-            pass
+            return False
         return user
-
     token = request.headers.get('token')
     if token:
         try:
@@ -63,19 +69,23 @@ def load_user(request):
             return None
         except BadSignature:
             return None
-
-        # check for 'logged out'
         user = User.query.get(data[0])
-        if user.password == (data[1]):
+        if user.password == data[1] and user.online:
             return user
     return None
+
 
 
 @app.route('/auth/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
-    logout_user()
-    return jsonify({'message': 'logged out'})
+    current_user.online = '0'
+    try:
+        db.session.commit()
+        return jsonify({'message': 'logged out'})
+    except:
+        db.session.rollback()
+    return jsonify({'message': 'error'})
 
 
 api.add_resource(Bucketlists, '/bucketlists/')

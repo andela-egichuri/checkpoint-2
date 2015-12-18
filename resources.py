@@ -42,7 +42,6 @@ class Bucketlists(Resource):
 		parser.add_argument('date_created')
 		parser.add_argument('date_modified')
 		args = parser.parse_args()
-		q = db.session.query
 		current_date = time.strftime('%Y/%m/%d %H:%M:%S')
 		bl = models.Bucketlist(name=args.name, date_created=current_date,
 			date_modified=current_date)
@@ -141,7 +140,6 @@ class BucketlistItems(Resource):
 		parser.add_argument('bucketlist_id')
 		args = parser.parse_args()
 
-		q = db.session.query
 		current_date = time.strftime('%Y/%m/%d %H:%M:%S')
 		bli = models.Item(name=args.name, date_created=current_date,
 			date_modified=current_date, done=args.done, bucketlist_id=id)
@@ -156,8 +154,6 @@ class BucketlistItems(Resource):
 
 
 class UserResource(Resource):
-	decorators = [login_required]
-
 	def get(self):
 		parser = RequestParser()
 		parser.add_argument('username', type=str, required=True)
@@ -175,18 +171,17 @@ class UserResource(Resource):
 			return {'Error': 'Fields required'}
 			abort(400)
 		if models.User.query.filter_by(username=args.username).first() is not None:
-			return {'Error': 'Username exists'}
+			return {'Error': 'Username taken'}
 			abort(400)
 		if models.User.query.filter_by(email=args.email).first() is not None:
-			return {'Error': 'Email exists'}
+			return {'Error': 'Email taken'}
 			abort(400)
-		q = db.session.query
 		user = models.User(username=args.username, email=args.email)
 		user.hash_password(args.password)
 		try:
 			db.session.add(user)
 			db.session.commit()
-			return {'username': user.username}, 201
+			return {'success': 'user created'}, 201
 		except:
 			db.session.rollback()
 			return {'Error': 'Error creating user'}
