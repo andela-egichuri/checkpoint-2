@@ -10,6 +10,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
     REMEMBER_COOKIE_DURATION = 600
+    TRAP_BAD_REQUEST_ERRORS = True
 
 
 class DevelopmentConfig(Config):

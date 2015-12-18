@@ -1,5 +1,5 @@
 import time
-from flask import jsonify, abort
+from flask import jsonify, abort, request
 from flask_restful.reqparse import RequestParser
 from passlib.apps import custom_app_context as pwd_context
 from flask.ext.login import login_required, current_user
@@ -21,7 +21,7 @@ bl_fields = {
 	'name': fields.String,
 	'date_created': fields.String,
 	'date_modified': fields.String,
-	'items': fields.Nested(bli_fields),
+	'bl_items': fields.Nested(bli_fields),
 	'created_by': fields.String
 }
 
@@ -31,9 +31,16 @@ class Bucketlists(Resource):
 
 	def get(self):
 		try:
-			bl = db.session.query(models.Bucketlist).filter_by(
-				created_by=current_user.id).all()
-			return marshal(bl, bl_fields)
+			limit = int(request.args['limit'])
+		except:
+			limit = 20
+
+		if limit > 100:
+			limit = 20
+
+		try:
+			bl = (models.Bucketlist).query.paginate(1, limit)
+			return marshal(bl.items, bl_fields)
 		except:
 			return {'Error': 'No Result'}, 400
 
