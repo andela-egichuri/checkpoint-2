@@ -1,11 +1,12 @@
 #!flask/bin/python
 import os
-from flask import Flask, flash, request
+import base64
+from flask import Flask, request, Response, g
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_restful import Api
-from flask_restful.reqparse import RequestParser
-from flask_security import auth_token_required
-from flask.ext.login import LoginManager, login_required, logout_user, login_user
+from flask.ext.login import LoginManager, logout_user, login_required
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
+    BadSignature, SignatureExpired
 
 
 app = Flask(__name__)
@@ -15,8 +16,10 @@ db = SQLAlchemy(app)
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_serializer = Serializer(app.config['SECRET_KEY'])
 
-import models
+
+from models import *
 from resources import *
 
 
@@ -27,55 +30,58 @@ def index():
 
 @app.route('/auth/login', methods=['POST'])
 def login():
-    # parser = RequestParser()
-    # parser.add_argument('username', required=True)
-    # parser.add_argument('password', required=True)
-    # args = parser.parse_args()
-    # username = args.username
-    # password = args.password
-    import ipdb
-    # ipdb.set_trace()
     username = request.form['username']
     password = request.form['password']
-    user = models.User.query.filter_by(username=username).first()
+    user = User.query.filter_by(username=username).first()
     if not user or not user.verify_password(password):
-        return jsonify({'message': 'Error: Username or Password is invalid'})
-    login_user(user)
-    return jsonify({'message': 'Logged in successfully'})
+        return jsonify({'message': 'Login Failed'})
+    token = user.generate_auth_token()
+    return jsonify({'token': token})
 
 
-# @login_manager.request_loader
-# def load_user(request):
-#     token = request.headers.get('Authorization')
-#     if token is None:
-#         token = request.args.get('token')
+@login_manager.request_loader
+def load_user(request):
+    print "request_loader"
+    auth_key = request.headers.get('Authorization')
 
-#     if token is not None:
-#         username,password = token.split(":") # naive token
-#         user_entry = User.get(username)
-#         if (user_entry is not None):
-#             user = User(user_entry[0],user_entry[1])
-#             if (user.password == password):
-#                 return user
-#     return None
+    if auth_key:
+        auth_key = auth_key.replace('Basic ', '', 1)
+        try:
+            auth_key = base64.b64decode(auth_key)
+            username, password = auth_key.split(":")
+            user = User.query.filter_by(username=username).first()
+            if not user or not user.verify_password(password):
+                return False
+        except TypeError:
+            pass
+        return user
 
-
-@login_manager.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+    token = request.headers.get('token')
+    if token:
+        try:
+            data = login_serializer.loads(token)
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None
+        user = User.query.get(data[0])
+        if user.password == (data[1]):
+            return user
+    return None
 
 
 @app.route('/auth/logout', methods=['GET', 'POST'])
+@login_required
 def logout():
     logout_user()
-    return jsonify({'message' : 'logged out'})
+    return jsonify({'message': 'logged out'})
+
 
 api.add_resource(Bucketlists, '/bucketlists/')
-
-api.add_resource(Bucketlist, '/bucketlists/<id>')
+api.add_resource(BucketlistResource, '/bucketlists/<id>')
 api.add_resource(BucketlistItems, '/bucketlists/<id>/items/')
 api.add_resource(BucketlistItem, '/bucketlists/<id>/items/<item_id>')
-api.add_resource(User, '/auth/register')
+api.add_resource(UserResource, '/auth/register')
 
 
 if __name__ == '__main__':

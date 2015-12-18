@@ -1,12 +1,11 @@
-from app import db
 import time
 from flask import jsonify, abort
 from flask_restful.reqparse import RequestParser
 from passlib.apps import custom_app_context as pwd_context
 from flask.ext.login import login_required
-
 from flask_restful import Resource, fields, marshal
 import models
+from app import db
 
 
 bli_fields = {
@@ -18,24 +17,24 @@ bli_fields = {
 }
 
 bl_fields = {
-	'id' : fields.Integer,
-	'name' : fields.String,
-	'date_created' : fields.String ,
-	'date_modified' : fields.String,
-	'items' : fields.Nested(bli_fields)
+	'id': fields.Integer,
+	'name': fields.String,
+	'date_created': fields.String,
+	'date_modified': fields.String,
+	'items': fields.Nested(bli_fields)
 }
 
-# /bucketlists/
-class Bucketlists(Resource):
 
-	@login_required
+class Bucketlists(Resource):
+	decorators = [login_required]
+
 	def get(self):
 		try:
-			bq = db.session.query(models.Bucketlist).all()
-			return marshal(bq, bl_fields)
+			bl = db.session.query(models.Bucketlist).all()
+			return marshal(bl, bl_fields)
 
 		except:
-			return { 'Error' : 'No Result'}, 400
+			return {'Error': 'No Result'}, 400
 
 	def post(self):
 		parser = RequestParser()
@@ -44,27 +43,28 @@ class Bucketlists(Resource):
 		parser.add_argument('date_modified')
 		args = parser.parse_args()
 		q = db.session.query
-
-		bl = models.Bucketlist(name=args.name, date_created=time.strftime("%x"),
-			date_modified=time.strftime("%x"))
+		current_date = time.strftime('%Y/%m/%d %H:%M:%S')
+		bl = models.Bucketlist(name=args.name, date_created=current_date,
+			date_modified=current_date)
 		try:
 			db.session.add(bl)
 			db.session.commit()
+			return marshal(bl, bl_fields)
 
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error Updating'}
+			return {'Error': 'Error Updating'}
 
 
+class BucketlistResource(Resource):
+	decorators = [login_required]
 
-# /bucketlists/<id>
-class Bucketlist(Resource):
 	def get(self, id):
 		try:
-			bq = db.session.query(models.Bucketlist).filter_by(id=id).one()
-			return marshal(bq, bl_fields)
+			bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
+			return marshal(bl, bl_fields)
 		except:
-			return { 'Error' : 'No Result'}, 400
+			return {'Error': 'No Result'}, 400
 
 	def put(self, id):
 		parser = RequestParser()
@@ -73,30 +73,33 @@ class Bucketlist(Resource):
 		args = parser.parse_args()
 		bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
 		bl.name = args.name
-		bl.date_modified=time.strftime("%x")
+		bl.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
 		try:
 			db.session.commit()
+			return marshal(bl, bl_fields)
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error Updating'}
-
+			return {'Error': 'Error Updating'}
 
 	def delete(self, id):
 		try:
 			bq = db.session.query(models.Bucketlist).filter_by(id=id).delete()
+			return {'Success': 'Deleted'}
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error Deleting'}
+			return {'Error': 'Error Deleting'}
 
 
-# /bucketlists/<id>/items/<item_id>
 class BucketlistItem(Resource):
+	decorators = [login_required]
+
 	def get(self, id, item_id):
 		try:
-			bqi = db.session.query(models.Item).filter_by(bucketlist_id=id, id=item_id).one()
+			bqi = db.session.query(models.Item).filter_by(
+				bucketlist_id=id, id=item_id).one()
 			return marshal(bqi, bli_fields)
 		except:
-			return { 'Error' : 'No Result'}, 400
+			return {'Error': 'No Result'}, 400
 
 	def put(self, id, item_id):
 		parser = RequestParser()
@@ -104,26 +107,31 @@ class BucketlistItem(Resource):
 		parser.add_argument('date_modified')
 		parser.add_argument('done')
 		args = parser.parse_args()
-		# Get a SQL Alchemy query object
-		bli = db.session.query(models.Item).filter_by(bucketlist_id=id, id=item_id).one()
+		bli = db.session.query(models.Item).filter_by(
+			bucketlist_id=id, id=item_id).one()
 		bli.name = args.name
 		bli.done = args.done
-		bli.date_modified=time.strftime("%x")
+		bli.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
 		try:
 			db.session.commit()
+			return marshal(bli, bli_fields)
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error Updating'}
+			return {'Error': 'Error Updating'}
 
 	def delete(self, id, item_id):
 		try:
-			bqi = db.session.query(models.Item).filter_by(bucketlist_id=id, id=item_id).delete()
+			bqi = db.session.query(models.Item).filter_by(
+				bucketlist_id=id, id=item_id).delete()
+			return {'Success': 'Deleted'}
 		except:
 			db.session.rollback()
-			return {'Error' : 'Error Deleting'}
+			return {'Error': 'Error Deleting'}
 
-# /bucketlists/<id>/items/
+
 class BucketlistItems(Resource):
+	decorators = [login_required]
+
 	def post(self, id):
 		parser = RequestParser()
 		parser.add_argument('name', type=str, required=True)
@@ -134,19 +142,22 @@ class BucketlistItems(Resource):
 		args = parser.parse_args()
 
 		q = db.session.query
-
-		bli = models.Item(name=args.name, date_created=time.strftime("%x"),
-			date_modified=time.strftime("%x"), done=args.done, bucketlist_id=id)
+		current_date = time.strftime('%Y/%m/%d %H:%M:%S')
+		bli = models.Item(name=args.name, date_created=current_date,
+			date_modified=current_date, done=args.done, bucketlist_id=id)
 
 		try:
 			db.session.add(bli)
 			db.session.commit()
+			return marshal(bli, bli_fields)
 		except:
 			db.session.rollback()
 			return {'Error': 'Error Deleting'}
 
 
-class User(Resource):
+class UserResource(Resource):
+	decorators = [login_required]
+
 	def get(self):
 		parser = RequestParser()
 		parser.add_argument('username', type=str, required=True)
