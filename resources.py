@@ -30,6 +30,7 @@ class Bucketlists(Resource):
 	decorators = [login_required]
 
 	def get(self):
+		# import ipdb; ipdb.set_trace()
 		try:
 			limit = int(request.args['limit'])
 		except:
@@ -39,7 +40,14 @@ class Bucketlists(Resource):
 			limit = 20
 
 		try:
-			bl = (models.Bucketlist).query.paginate(1, limit)
+			q = request.args['q']
+		except:
+			q = ''
+
+		try:
+			bl = (models.Bucketlist).query.filter(
+				models.Bucketlist.created_by == current_user.id,
+				models.Bucketlist.name.like('%' + q + '%')).paginate(1, limit)
 			return marshal(bl.items, bl_fields)
 		except:
 			return {'Error': 'No Result'}, 400
