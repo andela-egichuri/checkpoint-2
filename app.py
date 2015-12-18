@@ -41,7 +41,6 @@ def login():
 
 @login_manager.request_loader
 def load_user(request):
-    print "request_loader"
     auth_key = request.headers.get('Authorization')
 
     if auth_key:
@@ -64,6 +63,8 @@ def load_user(request):
             return None
         except BadSignature:
             return None
+
+        # check for 'logged out'
         user = User.query.get(data[0])
         if user.password == (data[1]):
             return user
