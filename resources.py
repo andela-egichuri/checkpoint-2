@@ -2,7 +2,7 @@ import time
 from flask import jsonify, abort
 from flask_restful.reqparse import RequestParser
 from passlib.apps import custom_app_context as pwd_context
-from flask.ext.login import login_required
+from flask.ext.login import login_required, current_user
 from flask_restful import Resource, fields, marshal
 import models
 from app import db
@@ -21,7 +21,8 @@ bl_fields = {
 	'name': fields.String,
 	'date_created': fields.String,
 	'date_modified': fields.String,
-	'items': fields.Nested(bli_fields)
+	'items': fields.Nested(bli_fields),
+	'created_by': fields.String
 }
 
 
@@ -30,9 +31,9 @@ class Bucketlists(Resource):
 
 	def get(self):
 		try:
-			bl = db.session.query(models.Bucketlist).all()
+			bl = db.session.query(models.Bucketlist).filter_by(
+				created_by=current_user.id).all()
 			return marshal(bl, bl_fields)
-
 		except:
 			return {'Error': 'No Result'}, 400
 
@@ -44,7 +45,7 @@ class Bucketlists(Resource):
 		args = parser.parse_args()
 		current_date = time.strftime('%Y/%m/%d %H:%M:%S')
 		bl = models.Bucketlist(name=args.name, date_created=current_date,
-			date_modified=current_date)
+			date_modified=current_date, created_by=int(current_user.id))
 		try:
 			db.session.add(bl)
 			db.session.commit()
