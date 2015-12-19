@@ -30,7 +30,6 @@ class Bucketlists(Resource):
 	decorators = [login_required]
 
 	def get(self):
-		# import ipdb; ipdb.set_trace()
 		try:
 			limit = int(request.args['limit'])
 		except:
@@ -157,7 +156,8 @@ class BucketlistItems(Resource):
 		args = parser.parse_args()
 
 		current_date = time.strftime('%Y/%m/%d %H:%M:%S')
-		bli = models.Item(name=args.name, date_created=current_date,
+		bli = models.Item(
+			name=args.name, date_created=current_date,
 			date_modified=current_date, done=args.done, bucketlist_id=id)
 
 		try:
@@ -202,8 +202,3 @@ class UserResource(Resource):
 			db.session.rollback()
 			return {'Error': 'Error creating user'}
 
-	def put(self):
-		pass
-
-	def delete(self):
-		pass

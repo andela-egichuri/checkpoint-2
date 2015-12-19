@@ -37,8 +37,7 @@ def login():
     if not user or not user.verify_password(password):
         return jsonify({'message': 'Login Failed'})
     token = user.generate_auth_token()
-    user = db.session.query(User).filter_by(
-            username=username).one()
+    user = db.session.query(User).filter_by(username=username).one()
     user.online = '1'
     try:
         db.session.commit()
@@ -73,7 +72,6 @@ def load_user(request):
         if user.password == data[1] and user.online:
             return user
     return None
-
 
 
 @app.route('/auth/logout', methods=['GET', 'POST'])
