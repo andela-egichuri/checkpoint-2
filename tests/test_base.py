@@ -14,7 +14,7 @@ class BaseTestCase(TestCase):
 
     def setUp(self):
         db.create_all()
-        self.test_user = self.client.post('/auth/register', data=dict(
+        self.create_user = self.client.post('/auth/register', data=dict(
             username='username', password='password', email='email@email.com'))
 
     def tearDown(self):
