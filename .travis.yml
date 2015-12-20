@@ -1,7 +1,6 @@
 language: python
 python:
   - "2.7"
-  - "3.2"
   - "3.3"
   - "3.4"
   - "3.5"
@@ -9,6 +8,12 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install coveralls
+env:
+  global:
+    - TRAVIS_BUILD=true
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
 # command to run tests
 script: nosetests  --with-coverage --cover-package=.
 
