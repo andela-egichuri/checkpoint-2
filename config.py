@@ -3,7 +3,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
-    DEBUG = False
+    DEBUG = True
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = os.environ.get('SECRET')
@@ -11,11 +11,11 @@ class Config(object):
     REMEMBER_COOKIE_DURATION = 600
     TRAP_BAD_REQUEST_ERRORS = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 
 
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     DEBUG = True
 
 

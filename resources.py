@@ -83,7 +83,6 @@ class BucketlistResource(Resource):
 	def put(self, id):
 		parser = RequestParser()
 		parser.add_argument('name', type=str, required=True)
-		parser.add_argument('date_modified')
 		args = parser.parse_args()
 		bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
 		bl.name = args.name
@@ -118,7 +117,6 @@ class BucketlistItem(Resource):
 	def put(self, id, item_id):
 		parser = RequestParser()
 		parser.add_argument('name', type=str, required=True)
-		parser.add_argument('date_modified')
 		parser.add_argument('done')
 		args = parser.parse_args()
 		bli = db.session.query(models.Item).filter_by(
