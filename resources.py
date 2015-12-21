@@ -2,6 +2,7 @@ import time
 from flask import jsonify, abort, request
 from flask_restful.reqparse import RequestParser
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import BadRequestKeyError
 from passlib.apps import custom_app_context as pwd_context
 from flask.ext.login import login_required, current_user
@@ -53,7 +54,7 @@ class Bucketlists(Resource):
             limit = 20
 
         if limit > 100:
-            limit = 20
+            limit = 100
 
         try:
             q = request.args['q']
@@ -65,8 +66,8 @@ class Bucketlists(Resource):
                 models.Bucketlist.created_by == current_user.id,
                 models.Bucketlist.name.like('%' + q + '%')).paginate(1, limit)
             return marshal(bl.items, bl_fields)
-        except:
-            return {'message': 'No Result'}, 400
+        except SQLAlchemyError:
+            return {'message': 'Error'}
 
     def post(self):
         """Create a bucketlist"""
@@ -76,16 +77,17 @@ class Bucketlists(Resource):
         parser.add_argument('date_modified')
         args = parser.parse_args()
         current_date = time.strftime('%Y/%m/%d %H:%M:%S')
-        bl = models.Bucketlist(name=args.name, date_created=current_date,
-            date_modified=current_date, created_by=int(current_user.id))
+
         try:
+            bl = models.Bucketlist(name=args.name, date_created=current_date,
+            date_modified=current_date, created_by=int(current_user.id))
             db.session.add(bl)
             db.session.commit()
             return marshal(bl, bl_fields)
 
         except SQLAlchemyError:
             db.session.rollback()
-            return {'message': 'Error Updating'}
+        return {'message': 'Error creating bucketlist'}
 
 
 class BucketlistResource(Resource):
@@ -99,22 +101,23 @@ class BucketlistResource(Resource):
             bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
             return marshal(bl, bl_fields)
         except SQLAlchemyError:
-            return {'message': 'No Result'}, 400
+            return {'message': 'No Result'}
 
     def put(self, id):
         """Update the bucketlist specified by id."""
         parser = RequestParser()
         parser.add_argument('name', type=str, required=True)
         args = parser.parse_args()
-        bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
-        bl.name = args.name
-        bl.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
+
         try:
+            bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
+            bl.name = args.name
+            bl.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
             db.session.commit()
             return marshal(bl, bl_fields)
-        except SQLAlchemyError:
+        except NoResultFound:
             db.session.rollback()
-            return {'message': 'Error Updating'}
+        return {'message': 'Error Updating'}
 
     def delete(self, id):
         """Delete a bucketlist specified by id."""
@@ -124,9 +127,7 @@ class BucketlistResource(Resource):
             db.session.commit()
             if bq:
                 return {'message': 'Deleted'}
-            else:
-                return {'message': 'No Bucketlist with the given ID'}
-        except SQLAlchemyError:
+        except NoResultFound:
             db.session.rollback()
         return {'message': 'Error Deleting'}
 
@@ -142,8 +143,8 @@ class BucketlistItem(Resource):
             bqi = db.session.query(models.Item).filter_by(
                 bucketlist_id=id, id=item_id).one()
             return marshal(bqi, bli_fields)
-        except SQLAlchemyError:
-            return {'message': 'No Result'}, 400
+        except NoResultFound:
+            return {'message': 'No Result'}
 
     def put(self, id, item_id):
         """Edit an item from bucketlist `id` specified by `item_id`."""
@@ -151,17 +152,18 @@ class BucketlistItem(Resource):
         parser.add_argument('name', type=str, required=True)
         parser.add_argument('done')
         args = parser.parse_args()
-        bli = db.session.query(models.Item).filter_by(
-            bucketlist_id=id, id=item_id).one()
-        bli.name = args.name
-        bli.done = args.done
-        bli.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
+
         try:
+            bli = db.session.query(models.Item).filter_by(
+            bucketlist_id=id, id=item_id).one()
+            bli.name = args.name
+            bli.done = args.done
+            bli.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
             db.session.commit()
             return marshal(bli, bli_fields)
-        except SQLAlchemyError:
+        except NoResultFound:
             db.session.rollback()
-            return {'message': 'Error Updating'}
+        return {'message': 'Error Updating'}
 
     def delete(self, id, item_id):
         """Delete an item from bucketlist `id` specified by `item_id`."""
@@ -172,8 +174,6 @@ class BucketlistItem(Resource):
             db.session.commit()
             if bqi:
                 return {'message': 'Deleted'}
-            else:
-                return {'message': 'No Bucketlist item with the given ID'}
         except SQLAlchemyError:
             db.session.rollback()
         return {'message': 'Error Deleting'}
@@ -195,17 +195,17 @@ class BucketlistItems(Resource):
         args = parser.parse_args()
 
         current_date = time.strftime('%Y/%m/%d %H:%M:%S')
-        bli = models.Item(
-            name=args.name, date_created=current_date,
-            date_modified=current_date, done=args.done, bucketlist_id=id)
 
         try:
+            bli = models.Item(
+            name=args.name, date_created=current_date,
+            date_modified=current_date, done=args.done, bucketlist_id=id)
             db.session.add(bli)
             db.session.commit()
             return marshal(bli, bli_fields)
         except SQLAlchemyError:
             db.session.rollback()
-            return {'message': 'Error Deleting'}
+        return {'message': 'Error creating bucketlist'}
 
 
 class UserResource(Resource):
@@ -217,7 +217,7 @@ class UserResource(Resource):
             users = db.session.query(models.User).all()
             return marshal(users, user_fields)
         except SQLAlchemyError:
-            return {'message': 'No Result'}, 400
+            return {'message': 'No Result'}
 
     def post(self):
         """Add(register) a user."""
@@ -227,22 +227,13 @@ class UserResource(Resource):
         parser.add_argument('password', required=True)
         args = parser.parse_args()
 
-        if args.username is None or args.password is None:
-            return {'message': 'Fields required'}
-            abort(400)
-        if models.User.query.filter_by(username=args.username).first() is not None:
-            return {'message': 'Username taken'}
-            abort(400)
-        if models.User.query.filter_by(email=args.email).first() is not None:
-            return {'message': 'Email taken'}
-            abort(400)
         user = models.User(username=args.username, email=args.email)
         user.hash_password(args.password)
         try:
             db.session.add(user)
             db.session.commit()
-            return {'message': 'user created'}, 201
+            return {'message': 'user created'}
         except SQLAlchemyError:
             db.session.rollback()
-            return {'message': 'Error creating user'}
+        return {'message': 'Error creating user'}
 

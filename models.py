@@ -14,7 +14,7 @@ class Bucketlist(db.Model):
     """Stores Bucketlists."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(100), unique=True)
     date_created = db.Column(db.DateTime)
     date_modified = db.Column(db.DateTime)
     bl_items = db.relationship('Item')

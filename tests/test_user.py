@@ -35,6 +35,34 @@ class TestUser(BaseTestCase):
         self.assertIn('message', failed_response.json)
         self.assertEqual(failed_response.json['message'], 'Login Failed')
 
+    def test_user_creation_required_fields(self):
+        """Test registration failure with no data provided.
+
+        To create a user a username, password and email address are required.
+        Omitting any of them raises a BAD REQUEST error
+        """
+        no_email = self.client.post('/auth/register', data=dict(
+            username='username', password='password'))
+        no_password = self.client.post('/auth/register', data=dict(
+            username='username', email='email@email.com'))
+        no_username = self.client.post('/auth/register', data=dict(
+            password='password', email='email@email.com'))
+        self.assert_400(no_email)
+        self.assert_400(no_password)
+        self.assert_400(no_username)
+        self.assertIn('username', no_username.json["message"])
+        self.assertIn('password', no_password.json["message"])
+        self.assertIn('email', no_email.json["message"])
+
+    def test_user_creation_unique_fields(self):
+        """Test registration failure with no data provided.
+
+        To create a user a username, password and email address are required
+        """
+        failed_response = self.client.post('/auth/register', data=dict(
+            username='username', password='password', email='email@email.com'))
+        self.assertEqual(failed_response.json['message'], 'Error creating user')
+
     def test_user_can_log_out(self):
         """Test logout success.
 

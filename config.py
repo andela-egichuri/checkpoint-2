@@ -3,7 +3,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
-    DEBUG = True
+    """Main config class."""
+
+    DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = os.environ.get('SECRET')
@@ -15,11 +17,13 @@ class Config(object):
 
 
 class DevelopmentConfig(Config):
+    """Config for Development."""
     DEVELOPMENT = True
     DEBUG = True
 
 
 class TestingConfig(Config):
+    """Config for Testing."""
     TESTING = True
     if os.getenv('TRAVIS_BUILD', None):
         SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']

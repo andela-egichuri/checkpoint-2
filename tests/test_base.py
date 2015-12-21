@@ -40,6 +40,18 @@ class BaseTestCase(TestCase):
         resp = self.client.get('/bucketlists/', headers={'token': self.token})
         self.initial_count = len(resp.json)
 
+        self.exp_token = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ1MDY4OTA0MSwiaWF0IjoxND\
+        UwNjg4NDQxfQ.WyIxIiwiJDYkcm91bmRzPTY0Mjg1NyRGcUZsSUxBeDh6UEhPWDNhJDd2L0\
+        5tUy9TajhKQVRSRVRGaUlYZVhjaE9aZ0JLbDVTREh3czg1LkhBT20xNi9BTW9kSFluZlhmM\
+        zk5MXFWWVpDclNsVzRBcHkuSTdFdlAuOWtEQncvIl0.IPzsof8lZr1vGPgxG-pDUo7RO5nO\
+        aLKkXaa-lIs0c_4"
+
+        self.invalid_token = "eqwJhbGciOiIUzI1NiIsImV4cCI6MTQ1MDY4OTA0MSwiaWF0IjoxND\
+        UwNjg4NDQxfQ.WyIxIiwiJDY98w1bmRzPTY0Mjg1NyRGcUZsSUxBeDh6UEhPWDNhJDd2L0\
+        5tUy9TajhKQVRSRVRGaUlYZVhjaE9aZ0JLbDVTREh3czg1LkhBT20xNi9BTW9kSFluZlhmM\
+        zk5MXFWWVpDclNsVzRBcHkuSTdFdlAuOWtEQncvIl0.IPzsof8lZr1vGPgxG-pDUo7RO5nO\
+        aLKkXaa-lIs0c_4"
+
     def tearDown(self):
         """Run instructions after each test is executed."""
         db.session.remove()
