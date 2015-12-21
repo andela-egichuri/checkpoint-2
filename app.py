@@ -24,12 +24,6 @@ from models import *
 from resources import *
 
 
-@app.route('/')
-def index():
-    """API Root. Nothing implemented here."""
-    return "API Root"
-
-
 @app.route('/auth/login', methods=['POST'])
 def login():
     """Log a user in and return an authentication token."""

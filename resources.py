@@ -209,15 +209,7 @@ class BucketlistItems(Resource):
 
 
 class UserResource(Resource):
-    """Resource for showing and adding users."""
-
-    def get(self):
-        """Show all users."""
-        try:
-            users = db.session.query(models.User).all()
-            return marshal(users, user_fields)
-        except SQLAlchemyError:
-            return {'message': 'No Result'}
+    """Resource for adding users."""
 
     def post(self):
         """Add(register) a user."""

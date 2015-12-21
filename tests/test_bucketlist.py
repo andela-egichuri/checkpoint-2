@@ -145,6 +145,21 @@ class TestBucketList(BaseTestCase):
         self.assert_400(response)
         self.assertIn('name', response.json["message"])
 
+    def test_get_single_bucketlist_item_requires_authentication(self):
+        """Test the method to get a bucketlist item succeeds with authentication.
+
+        If the user is unauthenticated a 401 UNAUTHORIZED response should be returned
+        With an authentication token a 200 OK response should be returned.
+        """
+        no_auth = self.client.get('/bucketlists/{0}/items/{1}'.format(
+            self.bl1.json['id'], self.bli1.json['id']))
+        get_bl = self.client.get('/bucketlists/{0}/items/{1}'.format(
+            self.bl1.json['id'], self.bli1.json['id']), headers={'token': self.token})
+        not_found = self.client.get('/bucketlists/1/items/50', headers={'token': self.token})
+        self.assert_401(no_auth)
+        self.assert_200(get_bl)
+        self.assertEqual(not_found.json['message'], 'No Result')
+
     def test_update_bucketlist_item_requires_authentication(self):
         """Test the method to update a bucketlist item requires authentication.
 
@@ -158,8 +173,12 @@ class TestBucketList(BaseTestCase):
         put_bl = self.client.put('/bucketlists/{0}/items/{1}'.format(
             self.bl1.json['id'], self.bli1.json['id']), data=dict(
             name='Edited Bucketlist Item Name', done='1'), headers={'token': self.token})
+        invalid_id = self.client.put('/bucketlists/{0}/items/10'.format(
+            self.bl1.json['id']), data=dict(name='Edited Bucketlist Item Name',
+            done='1'), headers={'token': self.token})
         bli = Item.query.filter_by(id=self.bli1.json['id']).one()
         self.assertEqual(bli.name, 'Edited Bucketlist Item Name')
+        self.assertEqual(invalid_id.json['message'], 'Error Updating')
         self.assert_401(no_auth)
         self.assert_200(put_bl)
 

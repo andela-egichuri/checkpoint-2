@@ -55,6 +55,9 @@ docs/_build/
 
 # PyBuilder
 target/
+<<<<<<< HEAD
 
 
 *.DS_Store
+=======
+>>>>>>> 0c77918... Initial commit
