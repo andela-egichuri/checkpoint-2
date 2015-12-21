@@ -49,18 +49,6 @@ def login():
 
 @login_manager.request_loader
 def load_user(request):
-    auth_key = request.headers.get('Authorization')
-    if auth_key:
-        auth_key = auth_key.replace('Basic ', '', 1)
-        try:
-            auth_key = base64.b64decode(auth_key)
-            username, password = auth_key.split(":")
-            user = User.query.filter_by(username=username).first()
-            if not user or not user.verify_password(password):
-                return False
-        except TypeError:
-            return False
-        return user
     token = request.headers.get('token')
     if token:
         try:

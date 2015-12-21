@@ -42,36 +42,6 @@ class User(db.Model, UserMixin):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password)
 
-    def verify_token(token):
-        try:
-            data = login_serializer.loads(token)
-            return data
-        except SignatureExpired:
-            return None
-        except BadSignature:
-            return None
-
     def generate_auth_token(self):
         data = [str(self.id), self.password]
         return login_serializer.dumps(data)
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    @property
-    def is_active(self):
-        return True
-
-    @property
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        try:
-            return unicode(self.id)
-        except NameError:
-            return str(self.id)
-
-    def __repr__(self):
-        return '<User %r>' % (self.username)
