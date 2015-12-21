@@ -3,6 +3,7 @@ import os
 import base64
 from flask import Flask, request, Response, g
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Api
 from flask.ext.login import LoginManager, logout_user, login_required, \
     current_user
@@ -11,9 +12,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
 import config
 app = Flask(__name__)
 
-# app.config.from_object(os.environ.get('APP_SETTINGS'))
 app.config.from_object(config.DevelopmentConfig)
-# app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 api = Api(app)
 login_manager = LoginManager()
@@ -27,11 +26,13 @@ from resources import *
 
 @app.route('/')
 def index():
+    """API Root. Nothing implemented here."""
     return "API Root"
 
 
 @app.route('/auth/login', methods=['POST'])
 def login():
+    """Log a user in and return an authentication token."""
     username = request.form['username']
     password = request.form['password']
     user = User.query.filter_by(username=username).first()
@@ -42,13 +43,18 @@ def login():
     user.online = '1'
     try:
         db.session.commit()
-    except:
+    except SQLAlchemyError:
         db.session.rollback()
     return jsonify({'token': token})
 
 
 @login_manager.request_loader
 def load_user(request):
+    """Check authentication token.
+
+    Authenticate user with provided token where the login_required
+    decorator is used
+    """
     token = request.headers.get('token')
     if token:
         try:
@@ -66,11 +72,12 @@ def load_user(request):
 @app.route('/auth/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
+    """Log a user out."""
     current_user.online = '0'
     try:
         db.session.commit()
         return jsonify({'message': 'logged out'})
-    except:
+    except SQLAlchemyError:
         db.session.rollback()
     return jsonify({'message': 'error'})
 

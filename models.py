@@ -11,6 +11,8 @@ login_serializer = Serializer(os.environ.get('SECRET'), expires_in=600)
 
 
 class Bucketlist(db.Model):
+    """Stores Bucketlists."""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100))
     date_created = db.Column(db.DateTime)
@@ -20,6 +22,8 @@ class Bucketlist(db.Model):
 
 
 class Item(db.Model):
+    """Stores Bucketlist Items"""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100))
     date_created = db.Column(db.DateTime)
@@ -29,6 +33,8 @@ class Item(db.Model):
 
 
 class User(db.Model, UserMixin):
+    """Stores users"""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(100), unique=True)
@@ -37,11 +43,14 @@ class User(db.Model, UserMixin):
     bucketlists = db.relationship('Bucketlist')
 
     def hash_password(self, password):
+        """Encrypt user password."""
         self.password = pwd_context.encrypt(password)
 
     def verify_password(self, password):
+        """Verify user password."""
         return pwd_context.verify(password, self.password)
 
     def generate_auth_token(self):
+        """Generate authentication token."""
         data = [str(self.id), self.password]
         return login_serializer.dumps(data)
