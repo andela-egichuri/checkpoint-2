@@ -8,11 +8,12 @@ from flask.ext.login import LoginManager, logout_user, login_required, \
     current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
     BadSignature, SignatureExpired
-
+import config
 app = Flask(__name__)
 
 # app.config.from_object(os.environ.get('APP_SETTINGS'))
-app.config.from_pyfile('config.py')
+app.config.from_object(config.DevelopmentConfig)
+# app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 api = Api(app)
 login_manager = LoginManager()

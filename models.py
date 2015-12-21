@@ -34,6 +34,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(128))
     online = db.Column(db.Boolean)
+    bucketlists = db.relationship('Bucketlist')
 
     def hash_password(self, password):
         self.password = pwd_context.encrypt(password)

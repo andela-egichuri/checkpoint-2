@@ -25,6 +25,14 @@ bl_fields = {
 	'created_by': fields.String
 }
 
+user_fields = {
+	'id': fields.Integer,
+	'username': fields.String,
+	'email': fields.String,
+	'online': fields.Boolean,
+	'bucketlists': fields.Nested(bl_fields)
+}
+
 
 class Bucketlists(Resource):
 	decorators = [login_required]
@@ -49,7 +57,7 @@ class Bucketlists(Resource):
 				models.Bucketlist.name.like('%' + q + '%')).paginate(1, limit)
 			return marshal(bl.items, bl_fields)
 		except:
-			return {'Error': 'No Result'}, 400
+			return {'message': 'No Result'}, 400
 
 	def post(self):
 		parser = RequestParser()
@@ -67,7 +75,7 @@ class Bucketlists(Resource):
 
 		except:
 			db.session.rollback()
-			return {'Error': 'Error Updating'}
+			return {'message': 'Error Updating'}
 
 
 class BucketlistResource(Resource):
@@ -78,7 +86,7 @@ class BucketlistResource(Resource):
 			bl = db.session.query(models.Bucketlist).filter_by(id=id).one()
 			return marshal(bl, bl_fields)
 		except:
-			return {'Error': 'No Result'}, 400
+			return {'message': 'No Result'}, 400
 
 	def put(self, id):
 		parser = RequestParser()
@@ -92,15 +100,20 @@ class BucketlistResource(Resource):
 			return marshal(bl, bl_fields)
 		except:
 			db.session.rollback()
-			return {'Error': 'Error Updating'}
+			return {'message': 'Error Updating'}
 
 	def delete(self, id):
 		try:
-			bq = db.session.query(models.Bucketlist).filter_by(id=id).delete()
-			return {'Success': 'Deleted'}
+			bq = db.session.query(models.Bucketlist).filter_by(id=id).one()
+			db.session.delete(bq)
+			db.session.commit()
+			if bq:
+				return {'message': 'Deleted'}
+			else:
+				return {'message': 'No Bucketlist with the given ID'}
 		except:
 			db.session.rollback()
-			return {'Error': 'Error Deleting'}
+		return {'message': 'Error Deleting'}
 
 
 class BucketlistItem(Resource):
@@ -112,7 +125,7 @@ class BucketlistItem(Resource):
 				bucketlist_id=id, id=item_id).one()
 			return marshal(bqi, bli_fields)
 		except:
-			return {'Error': 'No Result'}, 400
+			return {'message': 'No Result'}, 400
 
 	def put(self, id, item_id):
 		parser = RequestParser()
@@ -129,16 +142,21 @@ class BucketlistItem(Resource):
 			return marshal(bli, bli_fields)
 		except:
 			db.session.rollback()
-			return {'Error': 'Error Updating'}
+			return {'message': 'Error Updating'}
 
 	def delete(self, id, item_id):
 		try:
 			bqi = db.session.query(models.Item).filter_by(
-				bucketlist_id=id, id=item_id).delete()
-			return {'Success': 'Deleted'}
+				bucketlist_id=id, id=item_id).one()
+			db.session.delete(bqi)
+			db.session.commit()
+			if bqi:
+				return {'message': 'Deleted'}
+			else:
+				return {'message': 'No Bucketlist item with the given ID'}
 		except:
 			db.session.rollback()
-			return {'Error': 'Error Deleting'}
+		return {'message': 'Error Deleting'}
 
 
 class BucketlistItems(Resource):
@@ -164,15 +182,16 @@ class BucketlistItems(Resource):
 			return marshal(bli, bli_fields)
 		except:
 			db.session.rollback()
-			return {'Error': 'Error Deleting'}
+			return {'message': 'Error Deleting'}
 
 
 class UserResource(Resource):
 	def get(self):
-		parser = RequestParser()
-		parser.add_argument('username', type=str, required=True)
-		parser.add_argument('password', required=True)
-		args = parser.parse_args()
+		try:
+			users = db.session.query(models.User).all()
+			return marshal(users, user_fields)
+		except:
+			return {'message': 'No Result'}, 400
 
 	def post(self):
 		parser = RequestParser()
@@ -182,21 +201,21 @@ class UserResource(Resource):
 		args = parser.parse_args()
 
 		if args.username is None or args.password is None:
-			return {'Error': 'Fields required'}
+			return {'message': 'Fields required'}
 			abort(400)
 		if models.User.query.filter_by(username=args.username).first() is not None:
-			return {'Error': 'Username taken'}
+			return {'message': 'Username taken'}
 			abort(400)
 		if models.User.query.filter_by(email=args.email).first() is not None:
-			return {'Error': 'Email taken'}
+			return {'message': 'Email taken'}
 			abort(400)
 		user = models.User(username=args.username, email=args.email)
 		user.hash_password(args.password)
 		try:
 			db.session.add(user)
 			db.session.commit()
-			return {'success': 'user created'}, 201
+			return {'message': 'user created'}, 201
 		except:
 			db.session.rollback()
-			return {'Error': 'Error creating user'}
+			return {'message': 'Error creating user'}
 

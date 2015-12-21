@@ -41,9 +41,11 @@ class TestBucketList(BaseTestCase):
         self.assert_200(put_bl)
 
     def test_del_bucketlists_requires_authentication(self):
-        no_auth = self.client.delete('/bucketlists/%s' % (self.bl1.json['id']))
-        del_bl = self.client.delete('/bucketlists/%s' % (self.bl1.json['id']), headers={'token': self.token})
+        no_auth = self.client.delete('/bucketlists/%s' % self.bl1.json['id'])
+        del_bl = self.client.delete('/bucketlists/%s' % self.bl1.json['id'], headers={'token': self.token})
         bl = Bucketlist.query.all()
+        self.assertEqual(del_bl.json['message'], 'Deleted')
+        self.assertEqual(len(bl), self.initial_count - 1)
         self.assert_401(no_auth)
         self.assert_200(del_bl)
 
@@ -71,6 +73,7 @@ class TestBucketList(BaseTestCase):
         no_auth = self.client.delete('/bucketlists/%s/items/%s' % (self.bl1.json['id'], self.bli1.json['id']))
         del_bl = self.client.delete('/bucketlists/%s/items/%s' % (self.bl1.json['id'], self.bli1.json['id']), headers={'token': self.token})
         count_after = Item.query.all()
+        self.assertEqual(del_bl.json['message'], 'Deleted')
         self.assertEqual(len(count_after), len(count_before) - 1)
         self.assert_401(no_auth)
         self.assert_200(del_bl)
