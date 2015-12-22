@@ -8,7 +8,7 @@ from passlib.apps import custom_app_context as pwd_context
 from flask.ext.login import login_required, current_user
 from flask_restful import Resource, fields, marshal
 import models
-from app import db
+from api import db
 
 
 bli_fields = {
@@ -79,8 +79,9 @@ class Bucketlists(Resource):
         current_date = time.strftime('%Y/%m/%d %H:%M:%S')
 
         try:
-            bl = models.Bucketlist(name=args.name, date_created=current_date,
-            date_modified=current_date, created_by=int(current_user.id))
+            bl = models.Bucketlist(
+                name=args.name, date_created=current_date,
+                date_modified=current_date, created_by=int(current_user.id))
             db.session.add(bl)
             db.session.commit()
             return marshal(bl, bl_fields)
@@ -155,7 +156,7 @@ class BucketlistItem(Resource):
 
         try:
             bli = db.session.query(models.Item).filter_by(
-            bucketlist_id=id, id=item_id).one()
+                bucketlist_id=id, id=item_id).one()
             bli.name = args.name
             bli.done = args.done
             bli.date_modified = time.strftime('%Y/%m/%d %H:%M:%S')
@@ -196,8 +197,8 @@ class BucketlistItems(Resource):
 
         try:
             bli = models.Item(
-            name=args.name, date_created=current_date,
-            date_modified=current_date, done=args.done, bucketlist_id=id)
+                name=args.name, date_created=current_date,
+                date_modified=current_date, done=args.done, bucketlist_id=id)
             db.session.add(bli)
             db.session.commit()
             return marshal(bli, bli_fields)
@@ -226,4 +227,3 @@ class UserResource(Resource):
         except SQLAlchemyError:
             db.session.rollback()
         return {'message': 'Error creating user'}
-

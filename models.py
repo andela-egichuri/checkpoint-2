@@ -4,7 +4,7 @@ from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from flask import jsonify
-from app import db
+from api import db
 
 
 login_serializer = Serializer(os.environ.get('SECRET'), expires_in=1800)

@@ -1,6 +1,6 @@
 from flask.ext.testing import TestCase
 
-from checkpoint2.app import app, db
+from checkpoint2.api import app, db
 from checkpoint2.config import TestingConfig
 
 
@@ -32,25 +32,29 @@ class BaseTestCase(TestCase):
         self.bl5 = self.client.post('/bucketlists/', data=dict(
             name='Fifth Bucketlist'), headers={'token': self.token})
 
-        self.bli1 = self.client.post('/bucketlists/{0}/items/'.format(self.bl1.json['id']), data=dict(
-            name='First Bucketlist Item Name', done='0'), headers={'token': self.token})
-        self.bli2 = self.client.post('/bucketlists/{0}/items/'.format(self.bl1.json['id']), data=dict(
-            name='Second Bucketlist Item Name', done='1'), headers={'token': self.token})
+        self.bli1 = self.client.post(
+            '/bucketlists/{0}/items/'.format(self.bl1.json['id']),
+            data=dict(name='First Bucketlist Item Name', done='0'),
+            headers={'token': self.token})
+        self.bli2 = self.client.post(
+            '/bucketlists/{0}/items/'.format(self.bl1.json['id']),
+            data=dict(name='Second Bucketlist Item Name', done='1'),
+            headers={'token': self.token})
 
         resp = self.client.get('/bucketlists/', headers={'token': self.token})
         self.initial_count = len(resp.json)
 
-        self.exp_token = "eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ1MDY4OTA0MSwiaWF0IjoxND\
+        self.exp_token = 'eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ1MDY4OTA0MSwiaWF0IjoxND\
         UwNjg4NDQxfQ.WyIxIiwiJDYkcm91bmRzPTY0Mjg1NyRGcUZsSUxBeDh6UEhPWDNhJDd2L0\
         5tUy9TajhKQVRSRVRGaUlYZVhjaE9aZ0JLbDVTREh3czg1LkhBT20xNi9BTW9kSFluZlhmM\
         zk5MXFWWVpDclNsVzRBcHkuSTdFdlAuOWtEQncvIl0.IPzsof8lZr1vGPgxG-pDUo7RO5nO\
-        aLKkXaa-lIs0c_4"
+        aLKkXaa-lIs0c_4'
 
-        self.invalid_token = "eqwJhbGciOiIUzI1NiIsImV4cCI6MTQ1MDY4OTA0MSwiaWF0IjoxND\
+        self.invalid_token = 'eqwJhbGciOiIUzI1NiIsImV4cCI6MTQ1MDY4OTA0MSwiaWF0IjoxND\
         UwNjg4NDQxfQ.WyIxIiwiJDY98w1bmRzPTY0Mjg1NyRGcUZsSUxBeDh6UEhPWDNhJDd2L0\
         5tUy9TajhKQVRSRVRGaUlYZVhjaE9aZ0JLbDVTREh3czg1LkhBT20xNi9BTW9kSFluZlhmM\
         zk5MXFWWVpDclNsVzRBcHkuSTdFdlAuOWtEQncvIl0.IPzsof8lZr1vGPgxG-pDUo7RO5nO\
-        aLKkXaa-lIs0c_4"
+        aLKkXaa-lIs0c_4'
 
     def tearDown(self):
         """Run instructions after each test is executed."""

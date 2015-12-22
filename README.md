@@ -26,7 +26,7 @@ python manage.py db init
 python manage.py db migrate
 ```
 * Run the application
-`python app.py`
+`python api.py`
 
 ## EndPoints
 Access to all endpoints except login and registration require authentication.

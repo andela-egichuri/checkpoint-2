@@ -3,7 +3,7 @@ import unittest
 import flask.ext.testing
 from .test_base import BaseTestCase
 from flask.ext.login import current_user
-from checkpoint2.app import app, db
+from checkpoint2.api import app, db
 from checkpoint2.models import User
 
 
@@ -61,7 +61,8 @@ class TestUser(BaseTestCase):
         """
         failed_response = self.client.post('/auth/register', data=dict(
             username='username', password='password', email='email@email.com'))
-        self.assertEqual(failed_response.json['message'], 'Error creating user')
+        self.assertEqual(
+            failed_response.json['message'], 'Error creating user')
 
     def test_user_can_log_out(self):
         """Test logout success.
