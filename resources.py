@@ -188,8 +188,6 @@ class BucketlistItems(Resource):
         """Add an item to specified bucketlist `id`."""
         parser = RequestParser()
         parser.add_argument('name', type=str, required=True)
-        parser.add_argument('date_created')
-        parser.add_argument('date_modified')
         parser.add_argument('done')
         parser.add_argument('bucketlist_id')
         args = parser.parse_args()

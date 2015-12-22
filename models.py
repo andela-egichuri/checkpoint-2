@@ -7,7 +7,7 @@ from flask import jsonify
 from app import db
 
 
-login_serializer = Serializer(os.environ.get('SECRET'), expires_in=600)
+login_serializer = Serializer(os.environ.get('SECRET'), expires_in=1800)
 
 
 class Bucketlist(db.Model):
@@ -28,7 +28,7 @@ class Item(db.Model):
     name = db.Column(db.String(100))
     date_created = db.Column(db.DateTime)
     date_modified = db.Column(db.DateTime)
-    done = db.Column(db.Boolean)
+    done = db.Column(db.Boolean, default=False)
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.id'))
 
 
